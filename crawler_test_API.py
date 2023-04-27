@@ -1,4 +1,4 @@
-from crawler import Olx_Crawler, OtoDom_Crawler, OFFER, ESTATE
+from src.crawler import Olx_Crawler, OtoDom_Crawler, OFFER, ESTATE
 import json
 import os
 import time
