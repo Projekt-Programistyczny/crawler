@@ -1,3 +1,71 @@
-from src.database import add_link, select_cities
+from src.database import add_links, select_links
+from src.crawler import Olx_Crawler, OtoDom_Crawler, OFFER, ESTATE
+from typing import List, Dict
+from time import time
 
-cities = select_cities()
+
+CRAWLER_INTERVAL = 1 * 60 * 60 # 1 hour
+CITY_TO_EXPLORE = ['katowice']
+DEBUG = True
+
+
+def build_dict_for_db(url: str, city_name: str, type_of_estate: str, type_of_offer: str) -> Dict[str, str]:
+    return {"url": url,
+            "city_name": city_name,
+            "type_of_estate": type_of_offer,
+            "type_of_offer": type_of_estate}
+
+
+def get_list_of_existing_links(city: str, type_of_estate: str, type_of_offer: str) -> List[Dict[str, str]]:
+    links = select_links(city, type_of_estate, type_of_offer)
+    out = []
+    for link in links:
+        out.append(build_dict_for_db(link.url,
+                                     link.city_name,
+                                     link.type_of_offer,
+                                     link.type_of_estate))
+    return out
+
+
+def run_crawler(city: str, type_of_offer: OFFER, type_of_estate: ESTATE) -> None:
+    crawler_olx = Olx_Crawler(type_of_offer = type_of_offer, type_of_estate=type_of_estate, city=city)
+    crawler_otoDom = OtoDom_Crawler(type_of_offer = type_of_offer, type_of_estate=type_of_estate, city=city)
+
+    print(f"[{city}-{type_of_offer.value}-{type_of_estate.value}] Start search for Olx links...")
+    links_olx = crawler_olx.run()
+    print()
+    print(f"[{city}-{type_of_offer.value}-{type_of_estate.value}] Start search for OtoDom links...")
+    links_otoDom = crawler_otoDom.run()
+    links = links_olx + links_otoDom
+
+    unique_links = list(set(links))
+
+    old = get_list_of_existing_links(city, type_of_estate.value, type_of_offer.value)
+    new = []
+
+    for link in unique_links:
+        new.append(build_dict_for_db(link,
+                                     city,
+                                     type_of_offer.value,
+                                     type_of_estate.value))
+    new = list(filter(lambda x: x not in old, new))
+    add_links(new)
+    print()
+    print(f"Added {len(new)} new (unique) rows")
+
+
+if __name__ == "__main__":
+    if not DEBUG:
+        while True:
+            for city in CITY_TO_EXPLORE:
+                run_crawler(city, OFFER.RENT, ESTATE.APARTMENT)
+                run_crawler(city, OFFER.SALE, ESTATE.APARTMENT)
+                run_crawler(city, OFFER.RENT, ESTATE.HOUSE)
+                run_crawler(city, OFFER.SALE, ESTATE.HOUSE)
+            time.sleep(CRAWLER_INTERVAL)
+    else:
+        for city in CITY_TO_EXPLORE:
+            run_crawler(city, OFFER.RENT, ESTATE.APARTMENT)
+            run_crawler(city, OFFER.SALE, ESTATE.APARTMENT)
+            run_crawler(city, OFFER.RENT, ESTATE.HOUSE)
+            run_crawler(city, OFFER.SALE, ESTATE.HOUSE)

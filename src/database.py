@@ -19,19 +19,34 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
 
-def add_link(url, city_name, type_of_estate, type_of_offer) -> None:
+def add_links(list_of_links) -> None:
+    links_to_save = []
     with SessionLocal() as db:
-        db.query(ModelLink).add(
-            {
-                ModelLink.url: url,
-                ModelLink.city_name: city_name,
-                ModelLink.type_of_estate: type_of_estate,
-                ModelLink.type_of_offer: type_of_offer,
-                ModelLink.used: False
-            }
-        )
+        for link in list_of_links:
+            links_to_save.append(ModelLink(url = link["url"],
+                                    city_name = link["city_name"],
+                                    type_of_estate = link["type_of_estate"],
+                                    type_of_offer = link["type_of_offer"],
+                                    used = False
+                                    )
+                                )
+        db.add_all(links_to_save)
         db.commit()
 
+
+def select_links():
+    with SessionLocal() as db:
+        links_details = db.query(ModelLink).all()
+        return links_details
+    
+
+def select_links(city: str, estate: str, offer: str):
+    with SessionLocal() as db:
+        links_details = db.query(ModelLink).filter_by(city_name=city,
+                                                      type_of_estate=estate,
+                                                      type_of_offer=offer).all()
+        return links_details
+    
 
 def select_cities():
     with SessionLocal() as db:
