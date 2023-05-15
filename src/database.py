@@ -27,7 +27,8 @@ def add_links(list_of_links) -> None:
                                     city_name = link["city_name"],
                                     type_of_estate = link["type_of_estate"],
                                     type_of_offer = link["type_of_offer"],
-                                    used = False
+                                    used = False,
+                                    is_active = link["is_active"]
                                     )
                                 )
         db.add_all(links_to_save)
@@ -52,3 +53,10 @@ def select_cities():
     with SessionLocal() as db:
         cities_details = db.query(ModelCity).all()
         return cities_details
+
+
+def deactive_link(url):
+    with SessionLocal() as db:
+        row = db.query(ModelLink).filter_by(url=url).one()
+        row.is_active = False
+        db.commit()

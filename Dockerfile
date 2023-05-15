@@ -6,4 +6,4 @@ RUN python -m pip install --upgrade pip
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-CMD ["python3", "crawler_test_API.py"]
+CMD ["python3", "crawler_run.py"]

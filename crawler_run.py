@@ -1,4 +1,4 @@
-from src.database import add_links, select_links
+from src.database import add_links, select_links, deactive_link
 from src.crawler import Olx_Crawler, OtoDom_Crawler, OFFER, ESTATE
 from typing import List, Dict
 from time import time
@@ -9,11 +9,12 @@ CITY_TO_EXPLORE = ['katowice']
 DEBUG = True
 
 
-def build_dict_for_db(url: str, city_name: str, type_of_estate: str, type_of_offer: str) -> Dict[str, str]:
+def build_dict_for_db(url: str, city_name: str, type_of_estate: str, type_of_offer: str, is_active: bool=True) -> Dict[str, str]:
     return {"url": url,
             "city_name": city_name,
             "type_of_estate": type_of_offer,
-            "type_of_offer": type_of_estate}
+            "type_of_offer": type_of_estate,
+            "is_active": is_active}
 
 
 def get_list_of_existing_links(city: str, type_of_estate: str, type_of_offer: str) -> List[Dict[str, str]]:
@@ -23,7 +24,8 @@ def get_list_of_existing_links(city: str, type_of_estate: str, type_of_offer: st
         out.append(build_dict_for_db(link.url,
                                      link.city_name,
                                      link.type_of_offer,
-                                     link.type_of_estate))
+                                     link.type_of_estate,
+                                     link.is_active))
     return out
 
 
@@ -47,9 +49,16 @@ def run_crawler(city: str, type_of_offer: OFFER, type_of_estate: ESTATE) -> None
         new.append(build_dict_for_db(link,
                                      city,
                                      type_of_offer.value,
-                                     type_of_estate.value))
+                                     type_of_estate.value,
+                                     is_active=True))
     new = list(filter(lambda x: x not in old, new))
     add_links(new)
+
+    # update not_active links
+    not_active = list(filter(lambda x: x not in new, old))
+    for link in not_active:
+        deactive_link(link["url"])
+
     print()
     print(f"Added {len(new)} new (unique) rows")
 

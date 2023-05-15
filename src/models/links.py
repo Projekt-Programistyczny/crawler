@@ -12,3 +12,4 @@ class Link(Base):
     type_of_estate = Column(String)
     type_of_offer = Column(String)
     used = Column(Boolean)
+    is_active = Column(Boolean)
