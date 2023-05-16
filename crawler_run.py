@@ -6,7 +6,7 @@ from time import time
 
 CRAWLER_INTERVAL = 1 * 60 * 60 # 1 hour
 CITY_TO_EXPLORE = ['katowice']
-DEBUG = True
+DEBUG = False
 
 
 def build_dict_for_db(url: str, city_name: str, type_of_estate: str, type_of_offer: str, is_active: bool=True) -> Dict[str, str]:
