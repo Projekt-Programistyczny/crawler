@@ -2,11 +2,14 @@ from src.database import add_links, select_links, deactive_link
 from src.crawler import Olx_Crawler, OtoDom_Crawler, OFFER, ESTATE
 from typing import List, Dict
 from time import time
+import yaml
 
+with open('cities.yaml', 'r') as f:
+    cities_yaml = yaml.safe_load(f)
 
 CRAWLER_INTERVAL = 1 * 60 * 60 # 1 hour
-CITY_TO_EXPLORE = ['katowice']
-DEBUG = False
+CITY_TO_EXPLORE = cities_yaml["region"]["cities"]
+DEBUG = True
 
 
 def build_dict_for_db(url: str, city_name: str, type_of_estate: str, type_of_offer: str, is_active: bool=True) -> Dict[str, str]:
@@ -34,10 +37,19 @@ def run_crawler(city: str, type_of_offer: OFFER, type_of_estate: ESTATE) -> None
     crawler_otoDom = OtoDom_Crawler(type_of_offer = type_of_offer, type_of_estate=type_of_estate, city=city)
 
     print(f"[{city}-{type_of_offer.value}-{type_of_estate.value}] Start search for Olx links...")
-    links_olx = crawler_olx.run()
+
+    try:
+        links_olx = crawler_olx.run()
+    except:
+        links_olx = []
+
     print()
     print(f"[{city}-{type_of_offer.value}-{type_of_estate.value}] Start search for OtoDom links...")
-    links_otoDom = crawler_otoDom.run()
+
+    try:
+        links_otoDom = crawler_otoDom.run()
+    except:
+        links_otoDom = []
     links = links_olx + links_otoDom
 
     unique_links = list(set(links))
