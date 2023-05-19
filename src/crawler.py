@@ -93,8 +93,8 @@ class Crawler_Base(ABC):
 
             links = self._get_link_section(soup)
             hrefs = self._get_links(links)
-            logging.info("                                 ", end='\r')
-            logging.info(f"Saved {iterator} links", end="\r")
+            print("                                 ", end='\r')
+            logging.info(f"Saved {iterator} links")
 
             for href in hrefs:
                 if href not in list_of_offers:
@@ -108,8 +108,8 @@ class Crawler_Base(ABC):
             if page > self.page_limit:
                 break
 
-        logging.info("                                 ", end='\r')
-        logging.info(f"Saved {iterator} links", end="\r")
+        print("                                 ", end='\r')
+        logging.info(f"Saved {iterator} links")
         return list_of_offers
 
 
