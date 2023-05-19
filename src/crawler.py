@@ -10,7 +10,10 @@ from enum import Enum
 import json
 import bs4
 import re
+import logging
 
+logging.basicConfig(filename='logfile.txt', level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
 
 """
 Author: Kamil Wieczorek
@@ -90,8 +93,8 @@ class Crawler_Base(ABC):
 
             links = self._get_link_section(soup)
             hrefs = self._get_links(links)
-            print("                                 ", end='\r')
-            print(f"Saved {iterator} links", end="\r")
+            logging.info("                                 ", end='\r')
+            logging.info(f"Saved {iterator} links", end="\r")
 
             for href in hrefs:
                 if href not in list_of_offers:
@@ -105,8 +108,8 @@ class Crawler_Base(ABC):
             if page > self.page_limit:
                 break
 
-        print("                                 ", end='\r')
-        print(f"Saved {iterator} links", end="\r")
+        logging.info("                                 ", end='\r')
+        logging.info(f"Saved {iterator} links", end="\r")
         return list_of_offers
 
 
