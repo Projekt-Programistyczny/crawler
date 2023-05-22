@@ -4,11 +4,17 @@ from typing import List, Dict
 from time import time
 import yaml
 import logging
+import os
 
 logging.basicConfig(filename='logfile.txt', level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
-with open('cities.yaml', 'r') as f:
+
+
+absolute_path = os.path.dirname(__file__)
+cities_path = os.path.join(absolute_path, 'cities.yaml')
+
+with open(cities_path, 'r') as f:
     cities_yaml = yaml.safe_load(f)
 
 CRAWLER_INTERVAL = 1 * 60 * 60 # 1 hour
