@@ -3,8 +3,18 @@ from src.crawler import Olx_Crawler, OtoDom_Crawler, OFFER, ESTATE
 from typing import List, Dict
 from time import time
 import yaml
+import logging
+import os
 
-with open('cities.yaml', 'r') as f:
+logging.basicConfig(filename='logfile.txt', level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
+
+
+
+absolute_path = os.path.dirname(__file__)
+cities_path = os.path.join(absolute_path, 'cities.yaml')
+
+with open(cities_path, 'r') as f:
     cities_yaml = yaml.safe_load(f)
 
 CRAWLER_INTERVAL = 1 * 60 * 60 # 1 hour
@@ -35,7 +45,7 @@ def run_crawler(city: str, type_of_offer: OFFER, type_of_estate: ESTATE) -> None
     crawler_olx = Olx_Crawler(type_of_offer = type_of_offer, type_of_estate=type_of_estate, city=city)
     crawler_otoDom = OtoDom_Crawler(type_of_offer = type_of_offer, type_of_estate=type_of_estate, city=city)
 
-    print(f"[{city}-{type_of_offer.value}-{type_of_estate.value}] Start search for Olx links...")
+    logging.info(f"[{city}-{type_of_offer.value}-{type_of_estate.value}] Start search for Olx links...")
 
     try:
         links_olx = crawler_olx.run()
@@ -43,7 +53,7 @@ def run_crawler(city: str, type_of_offer: OFFER, type_of_estate: ESTATE) -> None
         links_olx = []
 
     print()
-    print(f"[{city}-{type_of_offer.value}-{type_of_estate.value}] Start search for OtoDom links...")
+    logging.info(f"[{city}-{type_of_offer.value}-{type_of_estate.value}] Start search for OtoDom links...")
 
     try:
         links_otoDom = crawler_otoDom.run()
@@ -71,7 +81,7 @@ def run_crawler(city: str, type_of_offer: OFFER, type_of_estate: ESTATE) -> None
         deactive_link(link["url"])
 
     print()
-    print(f"Added {len(new)} new (unique) rows")
+    logging.info(f"Added {len(new)} new (unique) rows")
 
 
 if __name__ == "__main__":
