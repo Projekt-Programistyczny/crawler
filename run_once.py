@@ -1,4 +1,4 @@
-from src.database import add_links, select_links, deactive_link
+from src.database import add_links, select_links,select_not_active_links, deactive_link, reactive_link
 from src.crawler import Olx_Crawler, OtoDom_Crawler, OFFER, ESTATE
 from typing import List, Dict
 from time import time
@@ -40,6 +40,17 @@ def get_list_of_existing_links(city: str, type_of_estate: str, type_of_offer: st
                                      link.is_active))
     return out
 
+def get_list_of_expired_links(city: str, type_of_estate: str, type_of_offer: str) -> List[Dict[str, str]]:
+    links = select_not_active_links(city, type_of_estate, type_of_offer)
+    out = []
+    for link in links:
+        out.append(build_dict_for_db(link.url,
+                                     link.city_name,
+                                     link.type_of_offer,
+                                     link.type_of_estate,
+                                     link.is_active))
+    return out
+
 
 def run_crawler(city: str, type_of_offer: OFFER, type_of_estate: ESTATE) -> None:
     crawler_olx = Olx_Crawler(type_of_offer = type_of_offer, type_of_estate=type_of_estate, city=city)
@@ -63,6 +74,7 @@ def run_crawler(city: str, type_of_offer: OFFER, type_of_estate: ESTATE) -> None
 
     unique_links = list(set(links))
 
+    # get active links
     old = get_list_of_existing_links(city, type_of_estate.value, type_of_offer.value)
     new = []
 
@@ -72,11 +84,35 @@ def run_crawler(city: str, type_of_offer: OFFER, type_of_estate: ESTATE) -> None
                                      type_of_offer.value,
                                      type_of_estate.value,
                                      is_active=True))
-    new = list(filter(lambda x: x not in old, new))
-    add_links(new)
+
+    # chceck only url
+    old_url = [link['url'] for link in old]
+    if 'https://www.otodom.pl/pl/oferta/domy-w-stanie-deweloperskim-oddane-do-uzytku-ID4lDwO' in old_url:
+        print("jest w starych")
+    new_url = [link['url'] for link in new]
+    if 'https://www.otodom.pl/pl/oferta/domy-w-stanie-deweloperskim-oddane-do-uzytku-ID4lDwO' in new_url:
+        print("jest w nowych")
+
+    # update not existing links
+    new_links_url = list(filter(lambda x: x not in old_url, new_url))
+    new_links = [link for link in new if link['url'] in new_links_url]
+
+    # Add new links to db
+    add_links(new_links)
+
+    # Chek if link need to be reactive
+    expired_links = get_list_of_expired_links(city, type_of_estate.value, type_of_offer.value)
+    expired_url = [link['url'] for link in expired_links]
+    reactive_links_url = list(filter(lambda x: x in expired_url, new_url))
+    reactive_links = [link for link in expired_links if link['url'] in reactive_links_url]
+    for link in reactive_links:
+        print(link)
+        reactive_link(link["url"])
 
     # update not_active links
-    not_active = list(filter(lambda x: x not in new, old))
+    not_active_url = list(filter(lambda x: x not in new_url, old_url))
+    not_active = [link for link in old if link['url'] in not_active_url]
+
     for link in not_active:
         deactive_link(link["url"])
 
