@@ -47,6 +47,14 @@ def select_links(city: str, estate: str, offer: str):
                                                       type_of_estate=estate,
                                                       type_of_offer=offer).all()
         return links_details
+    
+def select_not_active_links(city: str, estate: str, offer: str):
+    with SessionLocal() as db:
+        links_details = db.query(ModelLink).filter_by(city_name=city,
+                                                      type_of_estate=estate,
+                                                      type_of_offer=offer,
+                                                      is_active=False).all()
+        return links_details
 
 
 def select_cities():
@@ -54,6 +62,12 @@ def select_cities():
         cities_details = db.query(ModelCity).all()
         return cities_details
 
+def reactive_link(url):
+    with SessionLocal() as db:
+        row = db.query(ModelLink).filter_by(url=url).first()
+        # row.used = False
+        row.is_active = True
+        db.commit()
 
 def deactive_link(url):
     with SessionLocal() as db:
