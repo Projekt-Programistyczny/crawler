@@ -160,3 +160,4 @@ cython_debug/
 #.idea/
 /results
 dev_test.py
+logfile.txt

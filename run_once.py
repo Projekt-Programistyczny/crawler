@@ -40,6 +40,7 @@ def get_list_of_existing_links(city: str, type_of_estate: str, type_of_offer: st
                                      link.is_active))
     return out
 
+
 def get_list_of_expired_links(city: str, type_of_estate: str, type_of_offer: str) -> List[Dict[str, str]]:
     links = select_not_active_links(city, type_of_estate, type_of_offer)
     out = []

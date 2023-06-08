@@ -183,7 +183,6 @@ class OtoDom_Crawler(Crawler_Base):
             str_estate = "dom"
 
         if city == "cala-polska":
-            #TODO:
             pass
 
         return f"https://www.otodom.pl/pl/oferty/{str_offer}/{str_estate}/{city}?distanceRadius=0&page={int(page_no)}&limit=36&by=DEFAULT&direction=DESC&viewType=listing"
@@ -229,7 +228,6 @@ class Olx_Crawler(Crawler_Base):
             str_estate = "domy"
 
         if city == "cala-polska":
-            #TODO: shows only 25 page !!!
             pass
         
         return f"https://www.olx.pl/nieruchomosci/{str_estate}/{str_offer}/{city}/?page={int(page_no)}"
